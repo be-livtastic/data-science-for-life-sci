@@ -25,9 +25,10 @@ select(controls_df, Bodyweight)
 # Step 3: flatten to a numeric vector
 unlist(select(controls_df, Bodyweight))
 
-# Same three steps as a single pipeline 
+# Same three steps as a single pipeline
 controls <- filter(dat, Diet == "chow") |>
   select(Bodyweight) |>
+  unlist()
 
 treatment <- filter(dat, Diet == "hf") |>
   select(Bodyweight) |>
