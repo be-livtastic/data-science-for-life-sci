@@ -15,14 +15,9 @@ population_weights <- population_weights[!is.na(population_weights)]
 
 # ---- Assessing Normality of Mice Weights ----
 # The t-test assumes the data (or at least the sample means) are approximately normal.
-# With small samples (n=12 per group here) we can't rely on the CLT alone, so
-# we check the raw data directly.
 datPheno <- read.csv("data/mice_pheno.csv")
 
 # na.omit() drops any row that has a missing value in ANY column.
-# This is appropriate here because we need complete Sex + Diet + Bodyweight triplets.
-# If only Bodyweight were NA we could drop just those rows, but na.omit is safe since
-# the other columns are categorical and rarely missing in this dataset.
 datPheno <- na.omit(datPheno)
 cat("Rows after NA removal:", nrow(datPheno), "\n")
 
@@ -60,10 +55,6 @@ par(mfrow = c(1, 1))
 # acceptable for t-test use, especially given the sample sizes.
 
 # ---- Test for equality of variances ----
-# Before running a t-test it is worth checking whether the two groups have
-# similar variance, because Student's t-test (var.equal=TRUE) assumes they do.
-# var.test() performs an F-test: H0 = ratio of variances is 1 (equal variances).
-# A significant result (p < 0.05) means we should NOT assume equal variances.
 var_test <- var.test(treatment, controls)
 var_test
 

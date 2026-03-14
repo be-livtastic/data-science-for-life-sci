@@ -13,8 +13,7 @@ diff_in_means <- mean(treatment) - mean(controls)
 dat_pheno      <- read.csv("data/mice_pheno.csv")
 chowPopulation <- dat_pheno[dat_pheno$Sex == "F" & dat_pheno$Diet == "chow", 3]
 
-# Remove NAs before any sampling. sample() will draw NAs if they are present,
-# causing var() and mean() inside ttestgenerator() to return NA/NaN.
+
 chowPopulation <- chowPopulation[!is.na(chowPopulation)]
 cat("Chow population size (after NA removal):", length(chowPopulation), "\n")
 
@@ -23,8 +22,6 @@ if (length(chowPopulation) < 4) stop("Not enough chow population data for Monte 
 # ---- Monte Carlo Simulation of the t-statistic under H0 ----
 # Goal: verify that when there is truly no diet effect (both groups drawn from the
 # same population), the simulated t-statistics follow the theoretical t-distribution.
-# This is a sanity check: if the t-distribution is a valid model for our test
-# statistic, then the analytic p-values from t.test() are trustworthy.
 
 set.seed(1)
 
@@ -36,7 +33,7 @@ ttestgenerator <- function(n, population) {
   group2 <- sample(population, n)
 
   # Guard: if all values in a group are identical, var() = 0 → division by zero.
-  # This is extremely unlikely with real data but can happen with tiny n.
+
   var1 <- var(group1)
   var2 <- var(group2)
   if (var1 == 0 || var2 == 0) return(NA)
@@ -90,10 +87,6 @@ par(mfrow = c(1, 1))
 
 # ---- Permutation Test ----
 # The permutation test is a non-parametric alternative to the t-test.
-# It makes NO distributional assumptions (no normality, no equal-variance requirement).
-# Idea: if diet truly has no effect, then the group labels (hf vs chow) are arbitrary.
-# We can randomly reassign labels many times and see how often the reassigned
-# difference is as large as the one we actually observed.
 set.seed(1)
 
 combined  <- c(treatment, controls)  # pool both groups

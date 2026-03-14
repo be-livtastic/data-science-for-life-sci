@@ -9,14 +9,10 @@ treatment <- treatment[!is.na(treatment)]
 diff_in_means <- mean(treatment) - mean(controls)
 
 # ---- Load and clean the female controls population ----
-# femaleControlsPopulation.csv represents the full population of female chow-diet
-# mice — our "ground truth" for what random variation looks like under no treatment.
-# We use this to build a null distribution by simulation.
 population <- read.csv("data/femaleControlsPopulation.csv")
 population_weights <- unlist(population)
 
-# Remove NAs before any sampling. sample() does not skip NAs — if an NA is drawn,
-# mean() returns NA for that replicate and poisons the null distribution.
+# Remove NAs before any sampling.
 population_weights <- population_weights[!is.na(population_weights)]
 cat("Population size (after NA removal):", length(population_weights), "\n")
 
@@ -53,10 +49,6 @@ hist(nulls,
 abline(v = diff_in_means, col = "red", lwd = 2)
 
 # ---- Calculate the p-value ----
-# The p-value is the fraction of null simulations that produced a difference
-# at least as extreme (in either direction) as the one we actually observed.
-# We use abs() because we are doing a two-tailed test — a large negative difference
-# would be equally surprising under H0.
 p_value <- mean(abs(nulls) >= abs(diff_in_means))
 p_value
 p_value < 0.05
