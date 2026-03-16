@@ -134,6 +134,7 @@ par(mfrow=c(1,1))
 
 #Observations: Both groups show some deviations from normality, especially in the tails, but overall they are reasonably close to a normal distribution.
 
+
 # ---- Using t-test to compare means of two groups ----
 t_sim <- diff_in_means / sd(nulls)
 t_sim
@@ -154,6 +155,107 @@ t_test_result <- t.test(treatment, controls)
 t_test_result$statistic  # t-statistic
 # Conclusion: Both manual calculation and t.test function yield similar t-statistics and p-values, confirming the significant effect of diet on mice weights.
 #t_sim has a different value than t_actual because t_sim is calculated based on the null distribution generated from random assignments, while t_actual is calculated using the actual sample data.
+
+# ---- Additional t-test and Standard Error Functions ----
+# Example datasets containing missing values (NA)
+# In real biological datasets, missing measurements are common
+group1 <- c(5, 10, NA, 15, 20)
+group2 <- c(8, 12, 16, NA, NA, 22)
+
+# ---- Welch's t-test with NA handling ----
+# Why Welch's t-test?
+# The classic Student's t-test assumes both groups have equal variances.
+# In biological data (such as body weight measurements), the variance between
+# groups is often different. Welch's t-test is preferred because it does NOT
+# assume equal variance and is therefore more robust.
+
+my_ttest <- function(group1, group2) {
+  # Remove missing values so they do not affect calculations
+  cleanGroup1 <- na.omit(group1)
+  cleanGroup2 <- na.omit(group2)
+  t.test(cleanGroup1, cleanGroup2, var.equal = FALSE)
+}
+
+result <- my_ttest(group1, group2)
+print(result)
+
+
+# ---- Manual Implementation of Welch's t-test ----
+# This function recreates the calculations done internally by t.test().
+# Writing the test manually helps understand how the statistics are derived.
+
+my_ttest_manual <- function(group1, group2) {
+  clean1 <- na.omit(group1)
+  clean2 <- na.omit(group2)
+
+  # Calculate means for each group
+  mean1 <- mean(clean1)
+  mean2 <- mean(clean2)
+  diff <- mean2 - mean1
+
+  # Sample sizes
+  n1 <- length(clean1)
+  n2 <- length(clean2)
+
+  # Variance measures how spread out the values are around the mean
+  # It is the average of the squared deviations from the mean
+  var1 <- var(clean1)
+  var2 <- var(clean2)
+
+  # ---- Standard Error of the Difference in Means ----
+  # Standard Error measures how much the estimated difference in means
+  # would vary if we repeated the sampling many times.
+  # Larger variance or smaller sample sizes increase the standard error.
+  se <- sqrt(var1 / n1 + var2 / n2)
+
+  # ---- t-statistic ----
+  # The t-statistic represents how many standard errors the observed
+  # difference in means is away from zero (the null hypothesis value).
+  t_stat <- diff / se
+
+  # ---- Welch–Satterthwaite Degrees of Freedom ----
+  # Welch's test adjusts the degrees of freedom to account for
+  # unequal variances between groups.
+  df <- (var1 / n1 + var2 / n2)^2 /
+        ((var1 / n1)^2 / (n1 - 1) + (var2 / n2)^2 / (n2 - 1))
+
+  # Two-tailed p-value
+  # This calculates the probability of observing a t-statistic as extreme
+  # as the one obtained if the null hypothesis were true.
+  p_val <- 2 * pt(-abs(t_stat), df = df)
+
+  # Return structured results
+  return(list(
+    mean_group1 = mean1,
+    mean_group2 = mean2,
+    difference = diff,
+    std_error = se,
+    t_statistic = t_stat,
+    df = df,
+    p_value = p_val,
+    n1_original = length(group1),
+    n1_clean = n1,
+    n2_original = length(group2),
+    n2_clean = n2
+  ))
+}
+
+# Run manual calculation
+my_ttest_manual(group1, group2)
+
+
+
+# ---- Standard Error Function ----
+# This function calculates the standard error for a single vector.
+# Standard error describes how much the sample mean is expected to vary
+# from the true population mean due to sampling variability.
+
+standard_error <- function(x) {
+  x <- na.omit(x)
+  # Standard Error formula:
+  # SE = standard deviation / sqrt(sample size)
+  sd(x) / sqrt(length(x))
+}
 
 # ---- Confidence Intervals ----
 # 95% Confidence Interval using t.test
