@@ -52,19 +52,6 @@ Concepts are reinforced through code that:
 
 ---
 
-## 🧬 Example Biological Question
-
-> Does a high-fat diet significantly change the average bodyweight of mice compared to a standard chow diet?
-
-The analysis:
-
-1. Separates mice into control and treatment groups
-2. Computes the observed difference in mean bodyweight
-3. Builds a **null distribution** by random reassignment of diet labels
-4. Calculates a **p-value** to measure statistical significance
-
-
----
 
 ## 🧬 Example Biological Question
 
